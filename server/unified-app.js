@@ -74,6 +74,9 @@ async function startUnifiedServer() {
         app.all('/api/proxy-image*', createFastNextHandler('ProxyImage'));
         app.all('/api/ratings*', createFastNextHandler('Ratings'));
         app.all('/api/send-email*', createFastNextHandler('SendEmail'));
+        
+        // 🚀 ADD THIS LINE - PayStack verification route
+        app.all('/api/verify-paystack-payment*', createFastNextHandler('PayStack'));
 
         // ============ CUSTOM BACKEND ROUTES (Minimal Middleware) ============
         // Only apply JSON parsing to specific endpoints that need it
@@ -82,7 +85,7 @@ async function startUnifiedServer() {
         
         // Optimized health check (no middleware)
         app.get('/api/health', (req, res) => {
-            if (dev) console.log('🏥 [FAST] Health check');
+            if (dev) console.log('🥏 [FAST] Health check');
             res.json({ 
                 status: 'ok', 
                 message: 'Unified scraper app running (optimized)',

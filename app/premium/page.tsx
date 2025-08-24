@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Crown, X, User, Check } from 'lucide-react'
 import { PayPalButtons } from '@paypal/react-paypal-js'
 import { useRouter } from 'next/navigation'
+import { PaymentMethodSelector } from '@/components/PayStackGooglePay'
 
 interface PricingTier {
   id: string
@@ -203,39 +204,6 @@ export default function PremiumPage() {
     }
   }
 
-  const handlePayment = async (tier: PricingTier, method: 'paypal' | 'googlepay') => {
-    if (method === 'paypal') {
-      return
-    }
-    
-    setIsProcessing(true)
-    
-    try {
-      if (method === 'googlepay') {
-        console.log('Processing Google Pay payment for:', tier.name, 'Amount: $' + tier.price)
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        alert('Google Pay payment successful! Premium activated.')
-        const premiumData = {
-          isPremium: true,
-          tier: tier.id,
-          purchaseDate: new Date().toISOString(),
-          expiryDate: calculateExpiryDate(tier.id),
-          paymentMethod: 'googlepay'
-        }
-        localStorage.setItem('premium_status', JSON.stringify(premiumData))
-      }
-      
-    } catch (error) {
-      console.error('Payment failed:', error)
-      alert('Payment failed. Please try again.')
-    } finally {
-      setIsProcessing(false)
-      setSelectedTier(null)
-      setPaymentMethod(null)
-    }
-  }
-
   const calculateExpiryDate = (tierId: string) => {
     const now = new Date()
     switch (tierId) {
@@ -287,7 +255,6 @@ export default function PremiumPage() {
             className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-full transition-colors text-gray-400 hover:text-white"
           >
             <X className="w-5 h-5" />
-            {/* <span className="text-sm font-medium">Cancel</span> */}
           </button>
           <h1 className="text-xl font-bold text-white">Premium</h1>
           <div className="flex items-center gap-2">
@@ -518,7 +485,7 @@ export default function PremiumPage() {
         </div>
       </div>
 
-      {/* Payment Method Selection Modal */}
+      {/* Payment Method Selection Modal - Shows both PayPal and Google Pay (PayStack disguise) */}
       {selectedTier && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-black rounded-2xl border border-yellow-400 p-6 w-full max-w-sm mx-auto shadow-2xl">
@@ -618,26 +585,17 @@ export default function PremiumPage() {
               </div>
             )}
 
-            {/* Google Pay Button */}
-            {paymentMethod === 'googlepay' && (
-              <button
-                onClick={() => handlePayment(selectedTier, 'googlepay')}
-                disabled={isProcessing}
-                className="w-full text-black py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 mb-4 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: "#FFFF00" }}
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent"></div>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Crown className="w-5 h-5" />
-                    Pay ${selectedTier.price}
-                  </>
-                )}
-              </button>
+            {/* Google Pay Button - This is actually PayStack disguised */}
+            {paymentMethod === 'googlepay' && user && (
+              <PaymentMethodSelector
+                selectedTier={selectedTier}
+                userEmail={user.email}
+                onClose={() => setSelectedTier(null)}
+                onSuccess={(premiumData) => {
+                  // Premium activated successfully
+                  window.location.reload() // Refresh to show premium status
+                }}
+              />
             )}
 
             <p className="text-gray-400 text-xs text-center mt-4">
