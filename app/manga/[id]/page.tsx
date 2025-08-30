@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { fetchMediaDetails } from "@/lib/anilist"
 import type { AnimeData } from "@/lib/anilist"
+import DownloadPopup from "@/components/DownloadPopup"
 
 interface ComickChapter {
   id: number
@@ -37,11 +38,21 @@ export default function MangaDetailPage() {
   const [chaptersPerPage] = useState(10)
   const [filteredChapters, setFilteredChapters] = useState<ComickChapter[]>([])
 
+  // Download functionality state
+  const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
+
   // Function to save chapters to localStorage before navigation
   const saveChaptersToStorage = () => {
     if (filteredChapters.length > 0) {
       localStorage.setItem("chapters", JSON.stringify(filteredChapters))
       localStorage.setItem("mangaId", id.toString())
+    }
+  }
+
+  // Function to handle download button click
+  const handleDownloadClick = () => {
+    if (filteredChapters.length > 0) {
+      setIsDownloadPopupOpen(true)
     }
   }
 
@@ -589,7 +600,7 @@ export default function MangaDetailPage() {
                 {filteredChapters.length > 0 ? (
                   <Link 
                     href={`/read/${manga.id}/${filteredChapters[0]?.chap}?chapterId=${filteredChapters[0]?.hid}`}
-                    onClick={saveChaptersToStorage} // ✅ Stores chapter list before navigating to read page
+                    onClick={saveChaptersToStorage}
                   >
                     <button className="bg-[#ff914d] hover:bg-[#e8823d] text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs">
                       <BookOpen className="w-3 h-3" />
@@ -602,14 +613,26 @@ export default function MangaDetailPage() {
                     {fetchingAllChapters ? "Loading..." : chaptersFetchError ? "Error" : "No Chapters"}
                   </button>
                 )}
-                <button 
-                  className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs opacity-50 cursor-not-allowed"
-                  title="Coming Soon"
-                  disabled
-                >
-                  <Download className="w-3 h-3" />
-                  Download
-                </button>
+                
+                {/* Updated Download Button */}
+                {filteredChapters.length > 0 ? (
+                  <button 
+                    onClick={handleDownloadClick}
+                    className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs"
+                  >
+                    <Download className="w-3 h-3" />
+                    Download
+                  </button>
+                ) : (
+                  <button 
+                    className="bg-gray-800 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 text-xs opacity-50 cursor-not-allowed"
+                    title={fetchingAllChapters ? "Loading chapters..." : chaptersFetchError ? "No chapters available" : "No chapters to download"}
+                    disabled
+                  >
+                    <Download className="w-3 h-3" />
+                    Download
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -770,7 +793,7 @@ export default function MangaDetailPage() {
                     href={`/read/${manga.id}/${chapter.chap}?chapterId=${chapter.hid}`}
                     key={chapter.hid}
                     className="block"
-                    onClick={saveChaptersToStorage} // ✅ Also stores chapter list for each individual chapter link
+                    onClick={saveChaptersToStorage}
                   >
                     <div className="flex items-center gap-3 p-3 bg-gray-800/30 hover:bg-gray-800/50 rounded-lg transition-colors group cursor-pointer">
                       {/* Chapter Icon */}
@@ -949,6 +972,15 @@ export default function MangaDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Download Popup */}
+      <DownloadPopup
+        isOpen={isDownloadPopupOpen}
+        onClose={() => setIsDownloadPopupOpen(false)}
+        chapters={filteredChapters}
+        mangaTitle={manga.title.english || manga.title.romaji}
+        totalChapters={filteredChapters.length}
+      />
     </div>
   )
 }
