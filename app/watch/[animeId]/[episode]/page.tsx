@@ -115,7 +115,7 @@ export default function WatchPage() {
 
   const [selectedMode, setSelectedMode] = useState<string>("Sub")
   const [episodeSearch, setEpisodeSearch] = useState("")
-  const [showEpisodeList, setShowEpisodeList] = useState(false)
+  const [showEpisodeList, setShowEpisodeList] = useState(true)
 
   // Error notifications state - Only network and fatal errors
   const [notifications, setNotifications] = useState<ErrorNotification[]>([])
@@ -470,10 +470,69 @@ export default function WatchPage() {
           return
         }
     
-        // 3. Try to match exact title or fallback
-        const matchedAnime = searchData.find(item =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ) || searchData[0]
+        // 3. Smart anime matching logic
+        const findBestMatch = (results: any[], query: string) => {
+          const normalizeTitle = (title: string) => 
+            title.toLowerCase()
+              .replace(/[^\w\s]/g, '') // Remove special characters
+              .replace(/\s+/g, ' ')    // Normalize spaces
+              .trim()
+
+          const normalizedQuery = normalizeTitle(query)
+          
+          // 1. Try exact match first
+          let exactMatch = results.find(item => 
+            normalizeTitle(item.title) === normalizedQuery
+          )
+          if (exactMatch) {
+            console.log(`✅ Found exact match: ${exactMatch.title}`)
+            return exactMatch
+          }
+
+          // 2. Try to find TV series over movies/specials (prefer main series)
+          const tvSeries = results.filter(item => item.type === 'TV')
+          if (tvSeries.length > 0) {
+            // Among TV series, find the one with most similar title
+            exactMatch = tvSeries.find(item => 
+              normalizeTitle(item.title) === normalizedQuery
+            )
+            if (exactMatch) {
+              console.log(`✅ Found exact TV match: ${exactMatch.title}`)
+              return exactMatch
+            }
+
+            // Find TV series that contains the query
+            const containsMatch = tvSeries.find(item =>
+              normalizeTitle(item.title).includes(normalizedQuery) ||
+              normalizedQuery.includes(normalizeTitle(item.title))
+            )
+            if (containsMatch) {
+              console.log(`✅ Found TV series containing query: ${containsMatch.title}`)
+              return containsMatch
+            }
+
+            // If no good match, prefer the TV series with highest score
+            const bestTvSeries = tvSeries.sort((a, b) => (b.score || 0) - (a.score || 0))[0]
+            console.log(`✅ Falling back to highest rated TV series: ${bestTvSeries.title}`)
+            return bestTvSeries
+          }
+
+          // 3. Last resort: find any result that contains the query
+          const fallbackMatch = results.find(item =>
+            normalizeTitle(item.title).includes(normalizedQuery) ||
+            normalizedQuery.includes(normalizeTitle(item.title))
+          )
+          if (fallbackMatch) {
+            console.log(`⚠️ Using fallback match: ${fallbackMatch.title}`)
+            return fallbackMatch
+          }
+
+          // 4. Ultimate fallback: first result
+          console.log(`⚠️ No good match found, using first result: ${results[0]?.title}`)
+          return results[0]
+        }
+
+        const matchedAnime = findBestMatch(searchData, searchQuery)
     
         const animeSession = matchedAnime.session
     
@@ -812,6 +871,12 @@ export default function WatchPage() {
     </div>
   )
 
+  // Truncate title function
+  const truncateTitle = (title: string, maxLength: number) => {
+    if (title.length <= maxLength) return title
+    return title.substring(0, maxLength) + '...'
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -893,28 +958,28 @@ export default function WatchPage() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - Mobile Responsive */}
       <div className="sticky top-0 z-40 bg-black/90 backdrop-blur-sm border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 onClick={handleBackButton}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors flex-shrink-0"
               >
-                <ArrowLeft className="w-5 h-5 text-white" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </button>
-              <div>
-                <h1 className="text-lg font-semibold text-white truncate max-w-xs sm:max-w-md">
-                  {anime?.title.english || anime?.title.romaji}
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-lg font-semibold text-white truncate">
+                  {truncateTitle(anime?.title.english || anime?.title.romaji || '', 25)}
                 </h1>
-                <p className="text-sm text-gray-400">Episode {currentEpisode?.episode || episodeNumber}</p>
+                <p className="text-xs sm:text-sm text-gray-400">Episode {currentEpisode?.episode || episodeNumber}</p>
               </div>
             </div>
             
-            {/* Sub/Dub Toggle */}
+            {/* Sub/Dub Toggle - Fixed position */}
             {streamData?.sources && streamData.sources.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex-shrink-0">
                 <div className="flex bg-[#232323] rounded-lg p-1">
                   {['Sub', 'Dub'].map((mode) => {
                     const hasMode = streamData.sources?.some(s => 
@@ -926,7 +991,7 @@ export default function WatchPage() {
                         key={mode}
                         onClick={() => setSelectedMode(mode)}
                         disabled={!hasMode}
-                        className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                           selectedMode === mode
                             ? 'bg-[#ff914d] text-white'
                             : hasMode
@@ -946,15 +1011,15 @@ export default function WatchPage() {
       </div>
 
       {/* Main Content - Responsive Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Episode Sidebar - Left on Desktop */}
           <div className="lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-[#232323] rounded-xl p-6 sticky top-24">
+            <div className="bg-[#232323] rounded-xl p-4 sm:p-6 sticky top-24">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-white">Episodes</h3>
-                  <span className="text-sm text-gray-400">({uiEpisodes.length})</span>
+                  <h3 className="text-base sm:text-lg font-semibold text-white">Episodes</h3>
+                  <span className="text-xs sm:text-sm text-gray-400">({uiEpisodes.length})</span>
                 </div>
                 
                 <button
@@ -1007,7 +1072,7 @@ export default function WatchPage() {
                         <button
                           onClick={loadMoreEpisodes}
                           disabled={loadingMoreEpisodes}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm"
+                          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-xs sm:text-sm"
                         >
                           {loadingMoreEpisodes ? (
                             <>
@@ -1017,7 +1082,7 @@ export default function WatchPage() {
                           ) : (
                             <>
                               <RotateCw className="w-4 h-4" />
-                              Load More Episodes
+                              Load More
                             </>
                           )}
                         </button>
@@ -1073,9 +1138,10 @@ export default function WatchPage() {
               )}
             </div>
 
-            {/* Video Controls */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+            {/* Video Controls - Mobile Responsive */}
+            <div className="mt-4 space-y-3">
+              {/* Auto-play toggle - Full width on mobile */}
+              <div className="flex items-center justify-center sm:justify-start">
                 <div className="flex items-center gap-2">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1084,98 +1150,101 @@ export default function WatchPage() {
                       onChange={(e) => setAutoPlayNext(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#ff914d]/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ff914d]"></div>
+                    <div className="relative w-9 h-5 sm:w-11 sm:h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#ff914d]/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-[#ff914d]"></div>
                   </label>
-                  <label htmlFor="autoplay" className="text-sm text-gray-300 cursor-pointer">
+                  <label htmlFor="autoplay" className="text-xs sm:text-sm text-gray-300 cursor-pointer">
                     Auto-play next episode
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Action buttons - Mobile optimized */}
+              <div className="flex items-center justify-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setShowComments(!showComments)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#232323] hover:bg-[#2C2C2C] rounded-lg text-sm transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#232323] hover:bg-[#2C2C2C] rounded-lg text-xs sm:text-sm transition-colors flex-1 sm:flex-none justify-center"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  Comments ({comments.length})
+                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Comments</span>
+                  <span className="text-gray-400">({comments.length})</span>
                 </button>
                 
                 <button
                   onClick={() => setShowRatingPopup(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#232323] hover:bg-[#2C2C2C] rounded-lg text-sm transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#232323] hover:bg-[#2C2C2C] rounded-lg text-xs sm:text-sm transition-colors flex-1 sm:flex-none justify-center"
                 >
-                  <Star className="w-4 h-4" />
-                  Rate ({episodeRating.toFixed(1)}/5)
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Rate</span>
+                  <span className="text-gray-400">({episodeRating.toFixed(1)}/5)</span>
                 </button>
               </div>
             </div>
 
-            {/* Comments Section */}
+            {/* Comments Section - Mobile Responsive */}
             {showComments && (
-              <div className="mt-6 bg-[#232323] rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">
+              <div className="mt-4 sm:mt-6 bg-[#232323] rounded-xl p-3 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
                   Comments ({comments.length})
                 </h3>
                 
-                {/* Add Comment */}
-                <div className="mb-6">
-                  <div className="flex gap-3">
+                {/* Add Comment - Mobile Responsive */}
+                <div className="mb-4 sm:mb-6">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <input
                       type="text"
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder={
                         isAuthenticated 
-                          ? "Share your thoughts about this episode..."
-                          : "Sign in to leave comments"
+                          ? "Share your thoughts..."
+                          : "Sign in to comment"
                       }
                       disabled={!isAuthenticated}
-                      className="flex-1 px-4 py-2 bg-[#2C2C2C] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-[#ff914d] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-3 sm:px-4 py-2 bg-[#2C2C2C] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-[#ff914d] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                       onKeyPress={(e) => e.key === 'Enter' && handleSubmitComment()}
                     />
                     <button
                       onClick={handleSubmitComment}
                       disabled={!isAuthenticated || !newComment.trim()}
-                      className="px-4 py-2 bg-[#ff914d] hover:bg-[#ff914d]/90 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2"
+                      className="px-3 sm:px-4 py-2 bg-[#ff914d] hover:bg-[#ff914d]/90 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
                     >
-                      <Send className="w-4 h-4" />
-                      Post
+                      <Send className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="sm:inline">Post</span>
                     </button>
                   </div>
                   
                   {!isAuthenticated && (
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-2 text-center sm:text-left">
                       Please sign in to participate in discussions
                     </p>
                   )}
                 </div>
 
-                {/* Comments List */}
-                <div className="space-y-4">
+                {/* Comments List - Mobile Responsive */}
+                <div className="space-y-3 sm:space-y-4 max-h-64 sm:max-h-96 overflow-y-auto">
                   {loadingComments ? (
                     <div className="text-center py-4">
-                      <Loader className="animate-spin h-6 w-6 text-[#ff914d] mx-auto mb-2" />
-                      <p className="text-gray-400 text-sm">Loading comments...</p>
+                      <Loader className="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-[#ff914d] mx-auto mb-2" />
+                      <p className="text-gray-400 text-xs sm:text-sm">Loading comments...</p>
                     </div>
                   ) : comments.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-                      <p>No comments yet</p>
-                      <p className="text-sm">Be the first to share your thoughts!</p>
+                    <div className="text-center py-6 sm:py-8 text-gray-400">
+                      <MessageCircle className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-600" />
+                      <p className="text-sm sm:text-base">No comments yet</p>
+                      <p className="text-xs sm:text-sm">Be the first to share your thoughts!</p>
                     </div>
                   ) : (
                     comments.map((comment) => (
-                      <div key={comment.id} className="bg-[#2C2C2C] rounded-lg p-4">
+                      <div key={comment.id} className="bg-[#2C2C2C] rounded-lg p-3 sm:p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-[#ff914d]">
+                          <span className="font-medium text-[#ff914d] text-sm sm:text-base truncate">
                             {comment.username}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                             {formatTimestamp(comment.timestamp)}
                           </span>
                         </div>
-                        <p className="text-gray-300 leading-relaxed">
+                        <p className="text-gray-300 leading-relaxed text-sm sm:text-base break-words">
                           {comment.message}
                         </p>
                       </div>
@@ -1188,56 +1257,60 @@ export default function WatchPage() {
         </div>
       </div>
 
-      {/* Rating Popup - Updated to 1-5 scale */}
+      {/* Rating Popup - Mobile Responsive and positioned at bottom */}
       {showRatingPopup && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4">
-          <div className="bg-[#232323] rounded-t-xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Rate Episode {currentEpisode?.episode || episodeNumber}</h3>
-              <button
-                onClick={() => setShowRatingPopup(false)}
-                className="p-1 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-
-            <div className="text-center mb-6">
-              <div className="text-sm text-gray-400 mb-2">
-                Current Rating: {episodeRating.toFixed(1)}/5 ({totalRatings} ratings)
-              </div>
-              {userRating > 0 && (
-                <div className="text-sm text-[#ff914d]">
-                  Your Rating: {userRating}/5
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-center gap-2 mb-6">
-              {[1, 2, 3, 4, 5].map((rating) => (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center">
+          <div className="bg-[#232323] rounded-t-xl w-full max-w-md mx-3 sm:mx-0 sm:rounded-xl sm:mb-4">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white">
+                  Rate Episode {currentEpisode?.episode || episodeNumber}
+                </h3>
                 <button
-                  key={rating}
-                  onClick={() => handleSubmitRating(rating)}
-                  onMouseEnter={() => setHoverRating(rating)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                    rating <= (hoverRating || userRating)
-                      ? 'bg-[#ff914d] text-white'
-                      : 'bg-[#2C2C2C] text-gray-400 hover:bg-gray-700'
-                  }`}
+                  onClick={() => setShowRatingPopup(false)}
+                  className="p-1 rounded-lg hover:bg-gray-800 transition-colors"
                 >
-                  <Star className={`w-5 h-5 ${rating <= (hoverRating || userRating) ? 'fill-current' : ''}`} />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                 </button>
-              ))}
-            </div>
+              </div>
 
-            <div className="text-center">
-              <p className="text-xs text-gray-500">
-                {isAuthenticated 
-                  ? "Click a star to rate this episode"
-                  : "Your rating will be saved anonymously"
-                }
-              </p>
+              <div className="text-center mb-4 sm:mb-6">
+                <div className="text-xs sm:text-sm text-gray-400 mb-2">
+                  Current Rating: {episodeRating.toFixed(1)}/5 ({totalRatings} ratings)
+                </div>
+                {userRating > 0 && (
+                  <div className="text-xs sm:text-sm text-[#ff914d]">
+                    Your Rating: {userRating}/5
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    key={rating}
+                    onClick={() => handleSubmitRating(rating)}
+                    onMouseEnter={() => setHoverRating(rating)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                      rating <= (hoverRating || userRating)
+                        ? 'bg-[#ff914d] text-white'
+                        : 'bg-[#2C2C2C] text-gray-400 hover:bg-gray-700'
+                    }`}
+                  >
+                    <Star className={`w-4 h-4 sm:w-5 sm:h-5 ${rating <= (hoverRating || userRating) ? 'fill-current' : ''}`} />
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs text-gray-500">
+                  {isAuthenticated 
+                    ? "Click a star to rate this episode"
+                    : "Your rating will be saved anonymously"
+                  }
+                </p>
+              </div>
             </div>
           </div>
         </div>

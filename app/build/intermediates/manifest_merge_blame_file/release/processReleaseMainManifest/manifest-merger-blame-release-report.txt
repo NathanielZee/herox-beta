@@ -1,0 +1,501 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3    Copyright 2019 Google Inc. All Rights Reserved.
+4
+5     Licensed under the Apache License, Version 2.0 (the "License");
+6     you may not use this file except in compliance with the License.
+7     You may obtain a copy of the License at
+8
+9         http://www.apache.org/licenses/LICENSE-2.0
+10
+11     Unless required by applicable law or agreed to in writing, software
+12     distributed under the License is distributed on an "AS IS" BASIS,
+13     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+14     See the License for the specific language governing permissions and
+15     limitations under the License.
+16-->
+17<!--
+18 The "package" attribute is rewritten by the Gradle build with the value of applicationId.
+19     It is still required here, as it is used to derive paths, for instance when referring
+20     to an Activity by ".MyActivity" instead of the full name. If more Activities are added to the
+21     application, the package attribute will need to reflect the correct path in order to use
+22     the abbreviated format.
+23-->
+24<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+25    package="cc.herox.twa"
+26    android:versionCode="1"
+27    android:versionName="1" >
+28
+29    <uses-sdk
+30        android:minSdkVersion="21"
+31        android:targetSdkVersion="35" />
+32
+33    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+33-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:26:9-80
+33-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:26:26-78
+34
+35    <queries>
+35-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\User\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:22:5-30:15
+36        <intent>
+36-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\User\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:23:9-29:18
+37            <action android:name="android.intent.action.VIEW" />
+37-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:139:17-68
+37-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:139:25-66
+38
+39            <category android:name="android.intent.category.BROWSABLE" />
+39-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:141:17-77
+39-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:141:27-75
+40
+41            <data android:scheme="https" />
+41-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:142:17-145:19
+41-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:142:23-45
+42        </intent>
+43        <intent>
+43-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:13:9-15:18
+44            <action android:name="com.android.vending.billing.InAppBillingService.BIND" />
+44-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:14:13-91
+44-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:14:21-88
+45        </intent>
+46        <intent>
+46-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:16:9-18:18
+47            <action android:name="com.google.android.apps.play.billingtestcompanion.BillingOverrideService.BIND" />
+47-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:17:13-116
+47-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:17:21-113
+48        </intent>
+49    </queries>
+50
+51    <uses-permission android:name="com.android.vending.BILLING" />
+51-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:10:5-67
+51-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:10:22-64
+52
+53    <permission
+53-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+54        android:name="cc.herox.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+54-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+55        android:protectionLevel="signature" />
+55-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+56
+57    <uses-permission android:name="cc.herox.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" /> <!-- Although the *SdkVersion is captured in gradle build files, this is required for non gradle builds -->
+57-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+57-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+58    <!-- <uses-sdk android:minSdkVersion="14"/> -->
+59    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+59-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:24:5-79
+59-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:24:22-76
+60    <uses-permission android:name="android.permission.INTERNET" />
+60-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:25:5-67
+60-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:25:22-64
+61
+62    <application
+62-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:35:5-215:19
+63        android:name="cc.herox.twa.Application"
+63-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:36:9-35
+64        android:allowBackup="true"
+64-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:37:9-35
+65        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+65-->[androidx.core:core:1.13.0] C:\Users\User\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+66        android:extractNativeLibs="true"
+67        android:icon="@mipmap/ic_launcher"
+67-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:38:9-43
+68        android:label="@string/appName"
+68-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:39:9-40
+69        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+69-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:41:9-105
+70        android:supportsRtl="true"
+70-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:43:9-35
+71        android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+71-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:44:9-68
+72        <meta-data
+72-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:46:9-48:58
+73            android:name="asset_statements"
+73-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:47:13-44
+74            android:resource="@string/assetStatements" />
+74-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:48:13-55
+75        <meta-data
+75-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:51:13-53:58
+76            android:name="web_manifest_url"
+76-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:52:17-48
+77            android:value="@string/webManifestUrl" />
+77-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:53:17-55
+78        <meta-data
+78-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:56:9-58:52
+79            android:name="twa_generator"
+79-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:57:13-41
+80            android:value="@string/generatorApp" />
+80-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:58:13-49
+81
+82        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity" >
+82-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:65:13-69:24
+82-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:65:23-104
+83            <meta-data
+83-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:66:13-68:53
+84                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+84-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:67:17-83
+85                android:value="@string/launchUrl" />
+85-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:68:17-50
+86        </activity>
+87        <activity
+87-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:72:9-151:20
+88            android:name="cc.herox.twa.LauncherActivity"
+88-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:72:19-50
+89            android:alwaysRetainTaskState="true"
+89-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:73:13-49
+90            android:exported="true"
+90-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:75:13-36
+91            android:label="@string/launcherName" >
+91-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:74:13-49
+92            <meta-data
+92-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:76:13-77:53
+93                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+93-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:76:24-85
+94                android:value="@string/launchUrl" />
+94-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:77:17-50
+95            <meta-data
+95-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:79:13-81:58
+96                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+96-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:80:17-83
+97                android:resource="@color/colorPrimary" />
+97-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:81:17-55
+98            <meta-data
+98-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:85:13-87:62
+99                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
+99-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:86:17-88
+100                android:resource="@color/colorPrimaryDark" />
+100-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:87:17-59
+101            <meta-data
+101-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:89:13-91:61
+102                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+102-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:90:17-87
+103                android:resource="@color/navigationColor" />
+103-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:91:17-58
+104            <meta-data
+104-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:93:13-95:65
+105                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
+105-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:94:17-92
+106                android:resource="@color/navigationColorDark" />
+106-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:95:17-62
+107            <meta-data
+107-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:97:13-99:68
+108                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+108-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:98:17-84
+109                android:resource="@color/navigationDividerColor" />
+109-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:99:17-65
+110            <meta-data
+110-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:101:13-103:72
+111                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
+111-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:102:17-89
+112                android:resource="@color/navigationDividerColorDark" />
+112-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:103:17-69
+113            <meta-data
+113-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:105:13-106:54
+114                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+114-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:105:24-95
+115                android:resource="@drawable/splash" />
+115-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:106:17-52
+116            <meta-data
+116-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:108:13-109:60
+117                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+117-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:108:24-104
+118                android:resource="@color/backgroundColor" />
+118-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:109:17-58
+119            <meta-data
+119-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:111:13-112:71
+120                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+120-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:111:24-105
+121                android:value="@integer/splashScreenFadeOutDuration" />
+121-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:112:17-69
+122            <meta-data
+122-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:114:13-115:60
+123                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+123-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:114:24-97
+124                android:value="@string/providerAuthority" />
+124-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:115:17-58
+125            <meta-data
+125-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:117:13-97
+126                android:name="android.app.shortcuts"
+126-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:117:24-60
+127                android:resource="@xml/shortcuts" />
+127-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:117:61-94
+128            <meta-data
+128-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:119:13-120:56
+129                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
+129-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:119:24-91
+130                android:value="@string/fallbackType" />
+130-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:120:17-53
+131            <meta-data
+131-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:126:13-127:54
+132                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+132-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:126:24-92
+133                android:value="@string/orientation" />
+133-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:127:17-52
+134
+135            <intent-filter>
+135-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:133:13-136:29
+136                <action android:name="android.intent.action.MAIN" />
+136-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:134:17-69
+136-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:134:25-66
+137
+138                <category android:name="android.intent.category.LAUNCHER" />
+138-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:135:17-77
+138-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:135:27-74
+139            </intent-filter>
+140            <intent-filter android:autoVerify="true" >
+140-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:138:13-146:29
+140-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:138:28-53
+141                <action android:name="android.intent.action.VIEW" />
+141-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:139:17-68
+141-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:139:25-66
+142
+143                <category android:name="android.intent.category.DEFAULT" />
+143-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:140:17-76
+143-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:140:27-73
+144                <category android:name="android.intent.category.BROWSABLE" />
+144-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:141:17-77
+144-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:141:27-75
+145
+146                <data
+146-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:142:17-145:19
+147                    android:host="@string/hostName"
+147-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:143:21-52
+148                    android:scheme="https" />
+148-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:142:23-45
+149            </intent-filter>
+150        </activity>
+151        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+151-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:153:9-90
+151-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:153:19-87
+152        <activity
+152-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:155:9-156:62
+153            android:name="com.google.androidbrowserhelper.trusted.WebViewFallbackActivity"
+153-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:155:19-97
+154            android:configChanges="orientation|screenSize" />
+154-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:156:13-59
+155
+156        <provider
+156-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:158:9-166:20
+157            android:name="androidx.core.content.FileProvider"
+157-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:159:13-62
+158            android:authorities="@string/providerAuthority"
+158-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:160:13-60
+159            android:exported="false"
+159-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:162:13-37
+160            android:grantUriPermissions="true" >
+160-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:161:13-47
+161            <meta-data
+161-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:163:13-165:53
+162                android:name="android.support.FILE_PROVIDER_PATHS"
+162-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:164:17-67
+163                android:resource="@xml/filepaths" />
+163-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:165:17-50
+164        </provider>
+165
+166        <service
+166-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:168:9-183:19
+167            android:name="cc.herox.twa.DelegationService"
+167-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:169:13-46
+168            android:enabled="@bool/enableNotification"
+168-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:170:13-55
+169            android:exported="@bool/enableNotification" >
+169-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:171:13-56
+170            <meta-data
+170-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:174:17-176:73
+171                android:name="android.support.customtabs.trusted.SMALL_ICON"
+171-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:175:21-81
+172                android:resource="@drawable/ic_notification_icon" />
+172-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:176:21-70
+173
+174            <intent-filter>
+174-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:179:13-182:29
+175                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+175-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:180:17-105
+175-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:180:25-103
+176
+177                <category android:name="android.intent.category.DEFAULT" />
+177-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:140:17-76
+177-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:140:27-73
+178            </intent-filter>
+179        </service>
+180
+181        <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
+181-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:186:13-118
+181-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:186:23-115
+182        <activity
+182-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:191:9-204:20
+183            android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentActivity"
+183-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:192:13-96
+184            android:configChanges="keyboardHidden|keyboard|orientation|screenLayout|screenSize"
+184-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:194:13-96
+185            android:exported="true"
+185-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:195:13-36
+186            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+186-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:193:13-72
+187            <intent-filter>
+187-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:197:13-199:29
+188                <action android:name="org.chromium.intent.action.PAY" />
+188-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:198:17-73
+188-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:198:25-70
+189            </intent-filter>
+190
+191            <meta-data
+191-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:201:13-203:67
+192                android:name="org.chromium.default_payment_method_name"
+192-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:202:17-72
+193                android:value="https://play.google.com/billing" />
+193-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:203:17-64
+194        </activity>
+195
+196        <!-- This service checks who calls it at runtime. -->
+197        <service
+197-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:207:9-213:19
+198            android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentService"
+198-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:208:13-95
+199            android:exported="true" >
+199-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:209:13-36
+200            <intent-filter>
+200-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:210:13-212:29
+201                <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
+201-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:211:17-85
+201-->C:\Users\User\Documents\herox212\herox123\app\src\main\AndroidManifest.xml:211:25-82
+202            </intent-filter>
+203        </service>
+204
+205        <meta-data
+205-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:22:9-24:37
+206            android:name="com.google.android.play.billingclient.version"
+206-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:23:13-73
+207            android:value="7.1.1" />
+207-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:24:13-34
+208
+209        <activity
+209-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:26:9-30:75
+210            android:name="com.android.billingclient.api.ProxyBillingActivity"
+210-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:27:13-78
+211            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+211-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:28:13-96
+212            android:exported="false"
+212-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:29:13-37
+213            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+213-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:30:13-72
+214        <activity
+214-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:31:9-35:75
+215            android:name="com.android.billingclient.api.ProxyBillingActivityV2"
+215-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:32:13-80
+216            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+216-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:33:13-96
+217            android:exported="false"
+217-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:34:13-37
+218            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+218-->[com.android.billingclient:billing:7.1.1] C:\Users\User\.gradle\caches\8.11.1\transforms\1dcabcea90c9508775a51aeea5d7fca7\transformed\billing-7.1.1\AndroidManifest.xml:35:13-72
+219        <activity
+219-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\User\.gradle\caches\8.11.1\transforms\57bacb9ef58048c0e6f8321d8067096b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+220            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+220-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\User\.gradle\caches\8.11.1\transforms\57bacb9ef58048c0e6f8321d8067096b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+221            android:exported="false"
+221-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\User\.gradle\caches\8.11.1\transforms\57bacb9ef58048c0e6f8321d8067096b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+222            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+222-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\User\.gradle\caches\8.11.1\transforms\57bacb9ef58048c0e6f8321d8067096b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+223
+224        <meta-data
+224-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\User\.gradle\caches\8.11.1\transforms\af1250092db6525f6762c9b32f91bede\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+225            android:name="com.google.android.gms.version"
+225-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\User\.gradle\caches\8.11.1\transforms\af1250092db6525f6762c9b32f91bede\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+226            android:value="@integer/google_play_services_version" />
+226-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\User\.gradle\caches\8.11.1\transforms\af1250092db6525f6762c9b32f91bede\transformed\play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+227
+228        <provider
+228-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+229            android:name="androidx.startup.InitializationProvider"
+229-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+230            android:authorities="cc.herox.twa.androidx-startup"
+230-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+231            android:exported="false" >
+231-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+232            <meta-data
+232-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+233                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+233-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+234                android:value="androidx.startup" />
+234-->[androidx.emoji2:emoji2:1.3.0] C:\Users\User\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+235            <meta-data
+235-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\User\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+236                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+236-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\User\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+237                android:value="androidx.startup" />
+237-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\User\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+238            <meta-data
+238-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+239                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+239-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+240                android:value="androidx.startup" />
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+241        </provider>
+242
+243        <service
+243-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:28:9-34:19
+244            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+244-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:29:13-103
+245            android:exported="false" >
+245-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:30:13-37
+246            <meta-data
+246-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:31:13-33:39
+247                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+247-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:32:17-94
+248                android:value="cct" />
+248-->[com.google.android.datatransport:transport-backend-cct:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\85bc3f8cc97bd85b10d760e1ca7886a3\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:33:17-36
+249        </service>
+250        <service
+250-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:26:9-30:19
+251            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+251-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:27:13-117
+252            android:exported="false"
+252-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:28:13-37
+253            android:permission="android.permission.BIND_JOB_SERVICE" >
+253-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:29:13-69
+254        </service>
+255
+256        <receiver
+256-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:32:9-34:40
+257            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+257-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:33:13-132
+258            android:exported="false" />
+258-->[com.google.android.datatransport:transport-runtime:3.1.8] C:\Users\User\.gradle\caches\8.11.1\transforms\390580f802b798735a90189ae7e85163\transformed\transport-runtime-3.1.8\AndroidManifest.xml:34:13-37
+259        <receiver
+259-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+260            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+260-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+261            android:directBootAware="false"
+261-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+262            android:enabled="true"
+262-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+263            android:exported="true"
+263-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+264            android:permission="android.permission.DUMP" >
+264-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+265            <intent-filter>
+265-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+266                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+266-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+266-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+267            </intent-filter>
+268            <intent-filter>
+268-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+269                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+269-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+269-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+270            </intent-filter>
+271            <intent-filter>
+271-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+272                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+272-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+272-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+273            </intent-filter>
+274            <intent-filter>
+274-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+275                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+275-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+275-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+276            </intent-filter>
+277        </receiver>
+278    </application>
+279
+280</manifest>

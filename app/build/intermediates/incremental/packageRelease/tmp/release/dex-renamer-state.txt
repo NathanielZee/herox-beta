@@ -1,0 +1,4 @@
+#Sun Aug 31 09:06:12 PDT 2025
+base.0=C\:\\Users\\User\\Documents\\herox212\\herox123\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

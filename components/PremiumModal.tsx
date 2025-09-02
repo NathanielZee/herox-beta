@@ -2,7 +2,7 @@
 'use client'
 
 import React from 'react';
-import { X, Crown, Download, Zap, Shield, Star, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Crown, Download, Zap, Shield, Star, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -10,20 +10,25 @@ interface PremiumModalProps {
   feature?: 'download' | 'bulkDownload' | 'hdQuality' | 'adFree';
   customMessage?: string;
   downloadsLeft?: number;
+  type?: 'anime' | 'manga'; // Add type to distinguish between anime and manga
 }
 
-const featureDetails = {
+const getFeatureDetails = (type: 'anime' | 'manga' = 'anime') => ({
   download: {
     icon: Download,
     title: 'Unlimited Downloads',
-    description: 'Download as many episodes as you want without daily limits',
+    description: type === 'anime' 
+      ? 'Download as many episodes as you want without daily limits'
+      : 'Download as many chapters as you want without daily limits',
     color: 'text-[#ff914d]',
     bgColor: 'bg-[#ff914d]/20'
   },
   bulkDownload: {
     icon: Zap,
     title: 'Bulk Download',
-    description: 'Download entire seasons with just one click',
+    description: type === 'anime'
+      ? 'Download entire seasons with just one click'
+      : 'Download entire manga series with just one click',
     color: 'text-purple-400',
     bgColor: 'bg-purple-400/20'
   },
@@ -37,18 +42,27 @@ const featureDetails = {
   adFree: {
     icon: Shield,
     title: 'Ad-Free Experience',
-    description: 'Enjoy uninterrupted streaming and downloads',
+    description: type === 'anime'
+      ? 'Enjoy uninterrupted streaming and downloads'
+      : 'Enjoy uninterrupted reading and downloads',
     color: 'text-green-400',
     bgColor: 'bg-green-400/20'
   }
-};
+});
 
-const premiumFeatures = [
+const getPremiumFeatures = (type: 'anime' | 'manga' = 'anime') => [
   { icon: Download, text: 'Unlimited Downloads', highlight: true },
-  { icon: Zap, text: 'Bulk Download All Episodes', highlight: true },
-  { icon: Star, text: 'HD & 4K Quality', highlight: false },
+  { 
+    icon: Zap, 
+    text: type === 'anime' ? 'Bulk Download All Episodes' : 'Bulk Download All Chapters', 
+    highlight: true 
+  },
   { icon: Shield, text: 'Ad-Free Experience', highlight: false },
-  { icon: Sparkles, text: 'Early Access to New Episodes', highlight: false },
+  { 
+    icon: Sparkles, 
+    text: type === 'anime' ? 'Early Access to New Episodes' : 'Early Access to New Chapters', 
+    highlight: false 
+  },
   { icon: Crown, text: 'Premium Support', highlight: false }
 ];
 
@@ -57,10 +71,13 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
   onClose,
   feature = 'download',
   customMessage,
-  downloadsLeft
+  downloadsLeft,
+  type = 'anime'
 }) => {
   if (!isOpen) return null;
 
+  const featureDetails = getFeatureDetails(type);
+  const premiumFeatures = getPremiumFeatures(type);
   const featureDetail = featureDetails[feature];
   const Icon = featureDetail.icon;
 
@@ -95,24 +112,6 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
           <p className="text-gray-300 text-xs mb-1">
             {customMessage || featureDetail.description}
           </p>
-
-          {/* Downloads remaining for free users */}
-          {downloadsLeft !== undefined && downloadsLeft > 0 && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-1 mb-1">
-              <p className="text-amber-300 text-xs">
-                ⚡ <span className="font-bold">{downloadsLeft}</span> download{downloadsLeft === 1 ? '' : 's'} left today
-              </p>
-            </div>
-          )}
-
-          {/* Daily limit reached */}
-          {downloadsLeft === 0 && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-1 mb-1">
-              <p className="text-red-300 text-xs">
-                🚫 Daily download limit reached.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Premium Features List */}

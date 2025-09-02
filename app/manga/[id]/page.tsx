@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, BookOpen, Download, Star, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, BookOpen, Download, Star, Calendar, ChevronLeft, ChevronRight, Crown } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { fetchMediaDetails } from "@/lib/anilist"
+import { usePremium } from "@/contexts/PremiumContext"
+import { PremiumModal } from "@/components/PremiumModal"
 import type { AnimeData } from "@/lib/anilist"
 import DownloadPopup from "@/components/DownloadPopup"
 
@@ -41,6 +43,20 @@ export default function MangaDetailPage() {
   // Download functionality state
   const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
 
+  // Premium context
+  const { 
+    isPremium, 
+    checkCanDownload, 
+    checkCanBulkDownload, 
+    recordDownload 
+  } = usePremium()
+
+  // Premium modal states
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [premiumModalFeature, setPremiumModalFeature] = useState<'download' | 'bulkDownload' | 'hdQuality'>('download')
+  const [premiumModalMessage, setPremiumModalMessage] = useState<string>()
+  const [downloadsLeft, setDownloadsLeft] = useState<number>()
+
   // Function to save chapters to localStorage before navigation
   const saveChaptersToStorage = () => {
     if (filteredChapters.length > 0) {
@@ -49,11 +65,31 @@ export default function MangaDetailPage() {
     }
   }
 
-  // Function to handle download button click
+  // Function to handle download button click with premium check
   const handleDownloadClick = () => {
-    if (filteredChapters.length > 0) {
-      setIsDownloadPopupOpen(true)
+    if (filteredChapters.length === 0) return
+    
+    // Check if user can download
+    const downloadCheck = checkCanDownload()
+    if (!downloadCheck.canDownload) {
+      setPremiumModalFeature('download')
+      setPremiumModalMessage(downloadCheck.reason)
+      setDownloadsLeft(downloadCheck.downloadsLeft)
+      setShowPremiumModal(true)
+      return
     }
+
+    // Only premium users get to see the download popup
+    if (!isPremium) {
+      setPremiumModalFeature('download')
+      setPremiumModalMessage('Upgrade to Premium for unlimited manga downloads!')
+      setDownloadsLeft(downloadCheck.downloadsLeft)
+      setShowPremiumModal(true)
+      return
+    }
+
+    // Premium users can proceed to the download popup
+    setIsDownloadPopupOpen(true)
   }
 
   // Function to fetch ALL chapters from all pages with retry logic
@@ -552,6 +588,15 @@ export default function MangaDetailPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Premium Modal - Higher z-index to appear in front */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        feature={premiumModalFeature}
+        customMessage={premiumModalMessage}
+        type="manga"
+      />
+
       {/* Hero Section */}
       <div className="relative h-64 overflow-hidden">
         {manga.bannerImage && (
@@ -569,6 +614,14 @@ export default function MangaDetailPage() {
           <button onClick={() => router.push("/")} className="p-2 bg-black/50 rounded-full backdrop-blur-sm">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
+          
+          {/* Premium Badge */}
+          {isPremium && (
+            <div className="bg-gradient-to-r from-[#ff914d] to-orange-600 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <Crown className="w-4 h-4 text-white" />
+              <span className="text-white text-xs font-bold">PREMIUM</span>
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -614,12 +667,15 @@ export default function MangaDetailPage() {
                   </button>
                 )}
                 
-                {/* Updated Download Button */}
+                {/* Updated Download Button with Premium Icon */}
                 {filteredChapters.length > 0 ? (
                   <button 
                     onClick={handleDownloadClick}
-                    className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs"
+                    className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs relative"
                   >
+                    {!isPremium && (
+                      <Crown className="w-3 h-3 text-[#ff914d] absolute -top-1 -right-1" />
+                    )}
                     <Download className="w-3 h-3" />
                     Download
                   </button>
@@ -687,8 +743,8 @@ export default function MangaDetailPage() {
         {/* Chapters */}
         {(filteredChapters.length > 0 || chaptersLoading || fetchingAllChapters || chaptersFetchError) && (
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">
                 Chapters
                 {fetchingAllChapters && (
                   <span className="ml-2 text-xs text-[#ff914d] animate-pulse">
@@ -701,20 +757,23 @@ export default function MangaDetailPage() {
                   </span>
                 )}
               </h3>
-              {availableLanguages.length > 1 && (
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="bg-gray-800 text-white text-xs px-2 py-1 rounded border border-gray-700 focus:border-[#ff914d] focus:outline-none"
-                  disabled={chaptersLoading || fetchingAllChapters}
-                >
-                  {availableLanguages.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {getLanguageDisplayName(lang)}
-                    </option>
-                  ))}
-                </select>
-              )}
+              <div className="flex items-center gap-3">
+                {/* Language selector */}
+                {availableLanguages.length > 1 && (
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    className="bg-gray-800 text-white text-xs px-2 py-1 rounded border border-gray-700 focus:border-[#ff914d] focus:outline-none"
+                    disabled={chaptersLoading || fetchingAllChapters}
+                  >
+                    {availableLanguages.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {getLanguageDisplayName(lang)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
 
             {/* Simple Error State with Retry Button */}

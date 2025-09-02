@@ -76,6 +76,36 @@ interface StreamData {
   }>
 }
 
+// Function to find exact anime match by title
+const findExactAnimeMatch = (searchResults: AnimepaheSearchResult[], targetAnime: AnimeData): AnimepaheSearchResult => {
+  const targetTitleEnglish = targetAnime.title.english?.toLowerCase().trim()
+  const targetTitleRomaji = targetAnime.title.romaji?.toLowerCase().trim()
+  
+  console.log(`🎯 Looking for exact match for: "${targetTitleEnglish}" or "${targetTitleRomaji}"`)
+  
+  // Try to find exact match
+  for (const result of searchResults) {
+    const resultTitle = result.title.toLowerCase().trim()
+    
+    console.log(`Comparing: "${resultTitle}" with target titles`)
+    
+    // Check for exact match with English title
+    if (targetTitleEnglish && resultTitle === targetTitleEnglish) {
+      console.log(`✅ Found exact match (English): "${result.title}"`)
+      return result
+    }
+    
+    // Check for exact match with Romaji title
+    if (targetTitleRomaji && resultTitle === targetTitleRomaji) {
+      console.log(`✅ Found exact match (Romaji): "${result.title}"`)
+      return result
+    }
+  }
+  
+  console.log(`❌ No exact match found, falling back to first result: "${searchResults[0].title}"`)
+  return searchResults[0]
+}
+
 export default function AnimeDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -205,7 +235,8 @@ export default function AnimeDetailPage() {
           return
         }
         
-        animeResult = searchData.data[0] as AnimepaheSearchResult
+        // Use exact matching function instead of just picking first result
+        animeResult = findExactAnimeMatch(searchData.data, animeData)
         setAnimepaheData(animeResult)
         console.log("Selected anime result:", animeResult)
       }
