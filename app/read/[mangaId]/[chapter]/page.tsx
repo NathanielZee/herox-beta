@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { ArrowLeft, Maximize2, Minimize2, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import { fetchMediaDetails } from "@/lib/anilist"
 import type { AnimeData } from "@/lib/anilist"
 
@@ -26,10 +26,31 @@ export default function ReadPage() {
   const [manga, setManga] = useState<AnimeData | null>(null)
   const [images, setImages] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
-  const [fullScreen, setFullScreen] = useState(false)
   const [chapters, setChapters] = useState<ComickChapter[]>([])
   const [currentChapterIndex, setCurrentChapterIndex] = useState(-1)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [showNavigation, setShowNavigation] = useState(false)
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Auto-hide navigation after 3 seconds of inactivity
+  useEffect(() => {
+    if (showNavigation) {
+      // Clear existing timeout
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+      
+      // Set new timeout to hide navigation
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowNavigation(false)
+      }, 3000)
+    }
+
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+    }
+  }, [showNavigation])
 
   // Load chapters from localStorage on component mount
   useEffect(() => {
@@ -75,15 +96,6 @@ export default function ReadPage() {
     }
   }, [mangaId, chapterId, router])
 
-  const toggleFullScreen = () => {
-    setFullScreen(!fullScreen)
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen()
-    } else {
-      document.exitFullscreen()
-    }
-  }
-
   const goToChapter = (delta: number) => {
     if (chapters.length === 0 || currentChapterIndex === -1) return
     
@@ -93,6 +105,14 @@ export default function ReadPage() {
     if (targetChapter) {
       router.push(`/read/${mangaId}/${targetChapter.chap}?chapterId=${targetChapter.hid}`)
     }
+  }
+
+  const handleScreenClick = (e: React.MouseEvent) => {
+    // Prevent toggling if clicking on navigation elements
+    if ((e.target as HTMLElement).closest('.navigation-element')) {
+      return
+    }
+    setShowNavigation(!showNavigation)
   }
 
   // Check if navigation is possible
@@ -127,9 +147,14 @@ export default function ReadPage() {
   }
 
   return (
-    <div ref={containerRef} className={`min-h-screen bg-black text-white ${fullScreen ? "overflow-hidden" : "overflow-y-auto"}`}>
-      {/* Header */}
-      <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm">
+    <div 
+      className={`min-h-screen bg-black text-white overflow-y-auto relative`}
+      onClick={handleScreenClick}
+    >
+      {/* Header - Now with conditional visibility and smooth transition */}
+      <div className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-black/90 backdrop-blur-sm transition-transform duration-300 ease-in-out navigation-element ${
+        showNavigation ? 'translate-y-0' : '-translate-y-full'
+      }`}>
         <div className="flex items-center gap-3">
           <button onClick={() => router.push(`/manga/${mangaId}`)} className="p-2 hover:bg-gray-800 rounded-full">
             <ArrowLeft className="w-5 h-5" />
@@ -166,26 +191,8 @@ export default function ReadPage() {
           >
             <ChevronRight className="w-5 h-5" />
           </button>
-          <button onClick={toggleFullScreen} className="hover:bg-gray-800 p-2 rounded">
-            {fullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-          </button>
         </div>
       </div>
-
-      {/* Chapter Info Bar */}
-      {currentChapter && (
-        <div className="bg-gray-900/50 backdrop-blur-sm px-4 py-2 text-center border-b border-gray-800">
-          <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
-            <span>
-              {currentChapterIndex + 1} of {chapters.length} chapters
-            </span>
-            {currentChapter.vol && currentChapter.vol !== "0" && (
-              <span>Volume {currentChapter.vol}</span>
-            )}
-            <span className="capitalize">{currentChapter.lang}</span>
-          </div>
-        </div>
-      )}
 
       {/* Reader - Webtoon Style (No Spacing) */}
       <div className="select-none">
@@ -197,16 +204,20 @@ export default function ReadPage() {
               className="w-full max-w-[800px] mx-auto block object-contain touch-pan-y"
               loading="lazy"
             />
-            {/* Page number overlay */}
-            <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              {index + 1} / {images.length}
-            </div>
+            {/* Page number overlay - Only show when navigation is visible */}
+            {showNavigation && (
+              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded transition-opacity duration-300">
+                {index + 1} / {images.length}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="sticky bottom-0 bg-black/90 backdrop-blur-sm border-t border-gray-800 p-4">
+      {/* Bottom Navigation - Now with conditional visibility */}
+      <div className={`fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-t border-gray-800 p-4 transition-transform duration-300 ease-in-out navigation-element ${
+        showNavigation ? 'translate-y-0' : 'translate-y-full'
+      }`}>
         <div className="flex items-center justify-between max-w-md mx-auto">
           <button 
             onClick={() => goToChapter(-1)} 
