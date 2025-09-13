@@ -39,6 +39,28 @@ const MEDIA_DETAIL_QUERY = `
           }
         }
       }
+      streamingEpisodes {
+        title
+        thumbnail
+        url
+        site
+      }
+    }
+  }
+`
+
+// New query specifically for episodes only
+const EPISODES_QUERY = `
+  query ($id: Int) {
+    Media(id: $id, type: ANIME) {
+      id
+      episodes
+      streamingEpisodes {
+        title
+        thumbnail
+        url
+        site
+      }
     }
   }
 `
@@ -62,7 +84,8 @@ const SCHEDULE_QUERY = `
 
 const API_URL = "https://graphql.anilist.co"
 
-interface AnimeData {
+// Type definitions
+export interface AnimeData {
   id: number
   type: string
   title: { romaji: string; english: string }
@@ -109,26 +132,25 @@ interface AnimeData {
     episode: number
     airingAt: number
   }
+  streamingEpisodes?: {
+    title: string
+    thumbnail: string
+    url: string
+    site: string
+  }[]
+}
+
+// Episode interface
+export interface AniListEpisode {
+  id: string
+  episode: number
+  title?: string
+  snapshot?: string
+  airingAt?: number
 }
 
 interface AniListResponse {
   data: { Media: AnimeData | null }
-}
-
-const fetchSingleAnime = async (query: string, variables: {}) => {
-  const response = await fetch("/api/anilist", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  })
-  const { data } = await response.json()
-  return data?.Media
 }
 
 /* ---------------- Single media helper ------------------------- */
@@ -150,6 +172,78 @@ async function fetchSingleMedia(variables: Record<string, unknown>): Promise<Ani
   } catch (err) {
     console.error("Error fetching media details:", err)
     return null
+  }
+}
+
+/* FIXED: Fetch episodes from AniList - PROPERLY EXPORTED */
+export async function fetchAnimeEpisodes(id: number): Promise<AniListEpisode[]> {
+  try {
+    console.log(`🔍 Fetching episodes from AniList for anime ID: ${id}`)
+    const res = await fetch("/api/anilist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        query: EPISODES_QUERY, 
+        variables: { id } 
+      }),
+    })
+
+    if (!res.ok) {
+      console.error("AniList episodes fetch error:", res.status)
+      return []
+    }
+
+    const json: AniListResponse = await res.json()
+    const media = json.data?.Media
+
+    if (!media) {
+      console.log("No media data found for ID:", id)
+      return []
+    }
+
+    console.log("Media data found:", {
+      id: media.id,
+      episodes: media.episodes,
+      streamingEpisodesCount: media.streamingEpisodes?.length || 0
+    })
+
+    // If streamingEpisodes exist, use them, but ensure we generate all episodes if count is incomplete
+    if (media.streamingEpisodes && media.streamingEpisodes.length > 0) {
+      let episodeList = media.streamingEpisodes.map((ep, index) => ({
+        id: String(index + 1),
+        episode: index + 1,
+        title: ep.title || `Episode ${index + 1}`,
+        snapshot: ep.thumbnail || undefined,
+      }))
+      // If AniList reports more episodes than streamingEpisodes, fill in missing ones
+      if (media.episodes && media.episodes > episodeList.length) {
+        for (let i = episodeList.length; i < media.episodes; i++) {
+          episodeList.push({
+            id: String(i + 1),
+            episode: i + 1,
+            title: `Episode ${i + 1}`,
+            snapshot: undefined
+          })
+        }
+      }
+      return episodeList
+    }
+
+    // Fallback: Generate episodes based on total episode count
+    if (media.episodes && media.episodes > 0) {
+      console.log(`✅ Generating ${media.episodes} episodes based on total count`)
+      return Array.from({ length: media.episodes }, (_, index) => ({
+        id: String(index + 1),
+        episode: index + 1,
+        title: `Episode ${index + 1}`,
+      }))
+    }
+
+    console.log("❌ No episodes found in AniList data")
+    return []
+  } catch (error) {
+    console.error("❌ Error fetching AniList episodes:", error)
+    return []
   }
 }
 
@@ -184,6 +278,7 @@ export const fetchSchedule = async (page = 1, perPage = 50) => {
   }
 }
 
+// Query definitions for different data types
 const trendingAnimeQuery = `
 query ($page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
@@ -404,6 +499,7 @@ query ($page: Int, $perPage: Int) {
 }
 `
 
+// Generic fetch function
 const fetchData = async (query: string, page = 1, perPage = 50) => {
   try {
     const response = await fetch("/api/anilist", {
@@ -424,8 +520,6 @@ const fetchData = async (query: string, page = 1, perPage = 50) => {
     }
 
     const json = (await response.json()) as { data?: { Page?: { media?: unknown[] } } }
-
-    // Safely drill-down; fall back to empty array if any level is null/undefined
     return json?.data?.Page?.media ?? []
   } catch (error) {
     console.error("Error fetching data:", error)
@@ -433,6 +527,7 @@ const fetchData = async (query: string, page = 1, perPage = 50) => {
   }
 }
 
+// Export all the fetcher functions
 export const fetchTopAiring = (page?: number) => fetchData(topAiringQuery, page)
 export const fetchNewEpisodeReleases = (page?: number) => fetchData(newEpisodeReleasesQuery, page)
 export const fetchMostFavorite = (page?: number) => fetchData(mostFavoriteQuery, page)
@@ -445,5 +540,3 @@ export const fetchTrendingManhwa = (page?: number) => fetchData(trendingManhwaQu
 export const fetchTrendingManhua = (page?: number) => fetchData(trendingManhuaQuery, page)
 
 export const fetchMangaDetails = (id: number) => fetchSingleMedia({ id })
-
-export type { AnimeData }

@@ -91,7 +91,8 @@ export default function WatchPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const animeId = Number.parseInt(params.animeId as string)
-  const episodeNumber = Number.parseInt(params.episode as string)
+  // Always start from episode 1
+  const episodeNumber = 1
 
   const [anime, setAnime] = useState<AnimeData | null>(null)
   const [animeInfo, setAnimeInfo] = useState<AnimeInfo | null>(null)
@@ -355,13 +356,13 @@ export default function WatchPage() {
     setNotifications(prev => prev.filter(n => n.id !== id))
   }
 
-  // Load episodes for a specific page
+  // Load episodes for a specific page - UPDATED TO USE StreamAPI
   const loadEpisodesPage = async (animeSession: string, page: number): Promise<Episode[]> => {
     try {
       console.log(`Loading episodes page ${page}`)
       
-      const episodesRes = await fetch(`/api/animepahe/episodes?session=${animeSession}&page=${page}`)
-      const episodesData = await episodesRes.json()
+      // UPDATED: Use StreamAPI instead of direct fetch
+      const episodesData = await StreamAPI.getAnimeEpisodes(animeSession, 'episode_desc', page)
       
       const episodesList = (episodesData.data || []).map((ep: any) => ({
         id: ep.session,
@@ -371,6 +372,8 @@ export default function WatchPage() {
         duration: ep.duration,
         snapshot: ep.snapshot
       }))
+  // Sort episodes ascending (episode 1 first)
+  episodesList.sort((a: Episode, b: Episode) => a.episode - b.episode)
       
       console.log(`Loaded ${episodesList.length} episodes for page ${page}`)
       return episodesList
@@ -443,7 +446,7 @@ export default function WatchPage() {
     }
   }
 
-  // MAIN INITIALIZATION - Only runs once on mount
+  // MAIN INITIALIZATION - Only runs once on mount - UPDATED TO USE StreamAPI
   useEffect(() => {
     const loadAnimeAndStream = async () => {
       try {
@@ -458,10 +461,9 @@ export default function WatchPage() {
         }
         setAnime(animeData)
     
-        // 2. Search for anime on Animepahe
+        // 2. Search for anime on Animepahe - UPDATED TO USE StreamAPI
         const searchQuery = animeData.title.english || animeData.title.romaji
-        const searchRes = await fetch(`/api/animepahe/search?q=${encodeURIComponent(searchQuery)}`)
-        const searchJson = await searchRes.json()
+        const searchJson = await StreamAPI.searchAnime(searchQuery, 1)
     
         const searchData = searchJson?.data || []
     
@@ -557,7 +559,7 @@ export default function WatchPage() {
     }    
 
     // IMPORTANT: Only run once on mount
-    if (animeId && episodeNumber) {
+    if (animeId) {
       loadAnimeAndStream()
     }
   }, [animeId, episodeNumber, router]) // Only depends on URL params
@@ -1051,7 +1053,8 @@ export default function WatchPage() {
                 ) : (
                   <div>
                     <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto scrollbar-none">
-                      {filteredEpisodes.map((episode) => (
+                      {/* Always sort episodes ascending before rendering */}
+                      {filteredEpisodes.slice().sort((a, b) => a.episode - b.episode).map((episode) => (
                         <button
                           key={episode.id}
                           onClick={() => handleEpisodeSelect(episode)}

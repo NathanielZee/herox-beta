@@ -304,61 +304,40 @@ export default function MangaDetailPage() {
   useEffect(() => {
     if (allChapters.length > 0) {
       setChaptersLoading(true)
-      
-      // Smart sorting function for chapter numbers - ASCENDING ORDER
-      const smartSort = (a: ComickChapter, b: ComickChapter) => {
-        const aChap = a.chap || "0"
-        const bChap = b.chap || "0"
-        
-        // Handle special cases like "Oneshot", "Extra", etc. (put at end)
-        if (aChap.toLowerCase() === "oneshot") return 1
-        if (bChap.toLowerCase() === "oneshot") return -1
-        if (aChap.toLowerCase().includes("extra")) return 1
-        if (bChap.toLowerCase().includes("extra")) return -1
-        
-        // Parse as numbers for proper sorting
-        const aNum = parseFloat(aChap)
-        const bNum = parseFloat(bChap)
-        
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-          return aNum - bNum // ASCENDING: 1, 2, 3, 4...
-        }
-        
-        // Fallback to string comparison using Intl.Collator for better sorting
-        return new Intl.Collator(undefined, { numeric: true }).compare(aChap, bChap)
-      }
-      
-      // Filter by language first
-      const languageFiltered = allChapters.filter((ch: ComickChapter) => ch.lang === selectedLanguage)
-      
+      // Only keep English chapters
+      const englishChapters = allChapters.filter((ch: ComickChapter) => ch.lang === 'en')
       // Remove duplicates by keeping the latest/best version of each chapter
-      const deduplicatedChapters = languageFiltered.reduce((acc: ComickChapter[], current: ComickChapter) => {
+      const deduplicatedChapters = englishChapters.reduce((acc: ComickChapter[], current: ComickChapter) => {
         const existingChapterIndex = acc.findIndex(ch => ch.chap === current.chap)
-        
         if (existingChapterIndex === -1) {
-          // No duplicate found, add the chapter
           acc.push(current)
         } else {
-          // Duplicate found - keep the one with higher ID (usually more recent)
           const existingChapter = acc[existingChapterIndex]
           if (current.id > existingChapter.id) {
             acc[existingChapterIndex] = current
           }
-          // If current.id <= existingChapter.id, keep the existing one (do nothing)
         }
-        
         return acc
       }, [])
-      
-      // Sort the deduplicated chapters
+      // Sort chapters ascending
+      const smartSort = (a: ComickChapter, b: ComickChapter) => {
+        const aChap = a.chap || "0"
+        const bChap = b.chap || "0"
+        if (aChap.toLowerCase() === "oneshot") return 1
+        if (bChap.toLowerCase() === "oneshot") return -1
+        if (aChap.toLowerCase().includes("extra")) return 1
+        if (bChap.toLowerCase().includes("extra")) return -1
+        const aNum = parseFloat(aChap)
+        const bNum = parseFloat(bChap)
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return aNum - bNum
+        }
+        return new Intl.Collator(undefined, { numeric: true }).compare(aChap, bChap)
+      }
       const filtered = deduplicatedChapters.sort(smartSort)
-      
-      console.log(`Language: ${selectedLanguage}, Original: ${languageFiltered.length}, After deduplication: ${filtered.length}`)
-      
-      // Small delay to show loading state
       setTimeout(() => {
         setFilteredChapters(filtered)
-        setCurrentPage(1) // Reset to first page when language changes
+        setCurrentPage(1)
         setChaptersLoading(false)
       }, 100)
     }
@@ -758,21 +737,7 @@ export default function MangaDetailPage() {
                 )}
               </h3>
               <div className="flex items-center gap-3">
-                {/* Language selector */}
-                {availableLanguages.length > 1 && (
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="bg-gray-800 text-white text-xs px-2 py-1 rounded border border-gray-700 focus:border-[#ff914d] focus:outline-none"
-                    disabled={chaptersLoading || fetchingAllChapters}
-                  >
-                    {availableLanguages.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {getLanguageDisplayName(lang)}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                {/* Language selector removed for speed - only English chapters shown */}
               </div>
             </div>
 

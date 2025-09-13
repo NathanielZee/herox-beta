@@ -7,7 +7,8 @@ export async function GET(req: Request) {
   const page = searchParams.get("page") || "1"
   const chapOrder = searchParams.get("chap-order") || "0"
   const dateOrder = searchParams.get("date-order") || ""
-  const lang = searchParams.get("lang") || ""
+  // Always fetch only English chapters
+  const lang = "en"
   const chap = searchParams.get("chap") || ""
 
   if (!hid) {
@@ -23,9 +24,9 @@ export async function GET(req: Request) {
     })
 
     // Add optional parameters if provided
-    if (dateOrder) params.append("date-order", dateOrder)
-    if (lang) params.append("lang", lang)
-    if (chap) params.append("chap", chap)
+  if (dateOrder) params.append("date-order", dateOrder)
+  params.append("lang", lang)
+  if (chap) params.append("chap", chap)
 
     const url = `https://comick-api-proxy.notaspider.dev/api/comic/${hid}/chapters?${params.toString()}`
     console.log("Fetching from:", url)

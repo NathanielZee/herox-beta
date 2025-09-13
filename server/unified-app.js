@@ -1,4 +1,4 @@
-// server/unified-app.js - Performance Optimized
+// server/unified-app.js - Updated with full Animepahe backend integration
 const express = require('express');
 const next = require('next');
 const path = require('path');
@@ -8,9 +8,16 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
-// Import your existing backend components
+// Import your existing backend components (now from server/)
 const Config = require('./utils/config');
 const { errorHandler, CustomError } = require('./middleware/errorHandler');
+const cache = require('./middleware/cache');
+
+// Import all your Animepahe routes
+const homeRoutes = require('./routes/homeRoutes');
+const queueRoutes = require('./routes/queueRoutes');
+const animeListRoutes = require('./routes/animeListRoutes');
+const animeInfoRoutes = require('./routes/animeInfoRoutes');
 const playRoutes = require('./routes/playRoutes');
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -27,7 +34,7 @@ async function startUnifiedServer() {
         try {
             Config.validate();
             Config.loadFromEnv();
-            console.log('✅ Backend configuration loaded');
+            console.log('✅ Backend configuration loaded successfully');
         } catch (error) {
             console.error('❌ Backend configuration error:', error.message);
             process.exit(1);
@@ -54,19 +61,29 @@ async function startUnifiedServer() {
             })(req, res, next);
         });
 
+        // Middleware to set hostUrl for each request (from your original code)
+        app.use((req, res, next) => {
+            try {
+                const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+                const host = req.headers.host;
+                if (protocol && host) {
+                    Config.setHostUrl(protocol, host);
+                }
+                next();
+            } catch (error) {
+                console.error('Error setting host URL:', error.message);
+                next(); // Continue even if this fails
+            }
+        });
+
         // ============ FAST NEXT.JS API ROUTES (Zero Express Processing) ============
-        // Create optimized handlers that bypass all Express middleware
         const createFastNextHandler = (routeName) => (req, res) => {
-            // Skip all logging for performance in production
             if (dev) console.log(`⚡ [FAST] ${routeName}:`, req.path);
-            
-            // Directly call Next.js handler without any Express processing
             setImmediate(() => handle(req, res));
         };
 
-        // Optimized route handlers (zero middleware)
+        // Optimized route handlers (zero middleware) - Your existing Next.js routes
         app.all('/api/anilist*', createFastNextHandler('AniList'));
-        app.all('/api/animepahe*', createFastNextHandler('AnimePahe'));
         app.all('/api/comick*', createFastNextHandler('ComicK'));
         app.all('/api/comments*', createFastNextHandler('Comments'));
         app.all('/api/mangadex*', createFastNextHandler('MangaDex'));
@@ -74,36 +91,72 @@ async function startUnifiedServer() {
         app.all('/api/proxy-image*', createFastNextHandler('ProxyImage'));
         app.all('/api/ratings*', createFastNextHandler('Ratings'));
         app.all('/api/send-email*', createFastNextHandler('SendEmail'));
-        
-        // 🚀 ADD THIS LINE - PayStack verification route
         app.all('/api/verify-paystack-payment*', createFastNextHandler('PayStack'));
 
-        // ============ CUSTOM BACKEND ROUTES (Minimal Middleware) ============
-        // Only apply JSON parsing to specific endpoints that need it
-        app.use('/api/play', express.json({ limit: '10mb' })); // Increased limit for better performance
-        app.use('/api/play', playRoutes);
+        // ============ ANIMEPAHE BACKEND ROUTES (Full Integration) ============
         
-        // Optimized health check (no middleware)
+        // 🚀 NEW: Animepahe API Routes with different cache durations
+        app.use('/api/animepahe', homeRoutes); // Search & Airing (caching handled in homeRoutes)
+        app.use('/api/animepahe', cache(30), queueRoutes); // Queue (30 seconds)
+        app.use('/api/animepahe', cache(3600), animeListRoutes); // Browse anime (1 hour)
+        app.use('/api/animepahe', cache(86400), animeInfoRoutes); // Anime info (1 day)
+        app.use('/api/animepahe', cache(1800), playRoutes); // Streaming links (30 minutes)
+
+        // Health check endpoint (enhanced with new features)
         app.get('/api/health', (req, res) => {
             if (dev) console.log('🥏 [FAST] Health check');
-            res.json({ 
-                status: 'ok', 
-                message: 'Unified scraper app running (optimized)',
+            
+            const redis = require('./utils/redis');
+            
+            const health = {
+                status: 'ok',
+                message: 'HeroX unified app with full Animepahe integration!',
+                features: [
+                    'anime-search', 
+                    'episode-list', 
+                    'streaming-links', 
+                    'airing-anime', 
+                    'browse-catalog',
+                    'queue-status'
+                ],
+                endpoints: [
+                    'GET /api/animepahe/airing - Get airing anime',
+                    'GET /api/animepahe/search?q=query - Search anime',
+                    'GET /api/animepahe/queue - Get encoding queue',
+                    'GET /api/animepahe/anime - Browse anime catalog',
+                    'GET /api/animepahe/:id - Get anime info',
+                    'GET /api/animepahe/:id/releases - Get anime episodes',
+                    'GET /api/animepahe/play/:id?episodeId=xxx - Get streaming links'
+                ],
+                timestamp: new Date().toISOString(),
+                uptime: process.uptime(),
+                redis: {
+                    enabled: redis.enabled,
+                    healthy: redis.isHealthy()
+                },
+                memory: process.memoryUsage(),
                 mode: 'local-residential-ip',
                 port: PORT,
                 environment: process.env.NODE_ENV || 'development',
-                performance: 'optimized'
-            });
+                version: '2.0.0-enhanced'
+            };
+            
+            res.json(health);
         });
 
-        // Error handling only for custom routes
-        app.use('/api/play', errorHandler);
+        // 404 handler for unknown API routes
+        app.use('/api/*', (req, res, next) => {
+            if (!res.headersSent) {
+                next(new CustomError(`API route not found: ${req.path}. Check available endpoints at /api/health`, 404));
+            }
+        });
+
+        // Global error handling middleware for API routes
+        app.use('/api/*', errorHandler);
 
         // ============ OPTIMIZED FRONTEND HANDLING ============
-        // Fast frontend handler with caching hints
         app.all('*', (req, res) => {
             if (!req.path.startsWith('/api/')) {
-                // Skip logging for static assets to improve performance
                 if (dev && !req.path.startsWith('/_next/') && !req.path.startsWith('/__nextjs')) {
                     console.log('🎨 [FAST] Frontend:', req.path);
                 }
@@ -114,31 +167,87 @@ async function startUnifiedServer() {
                 }
                 
                 return handle(req, res);
-            } else {
-                // Unknown API route - fast response
-                console.log('❓ [FAST] Unknown API route:', req.path);
-                res.status(404).json({ error: 'API route not found' });
             }
         });
 
+        // ============ GRACEFUL SHUTDOWN HANDLERS ============
+        const gracefulShutdown = async (signal) => {
+            console.log(`\nReceived ${signal}. Starting graceful shutdown...`);
+            
+            // Stop accepting new requests
+            server.close(async () => {
+                console.log('HTTP server closed');
+                
+                try {
+                    // Cleanup Redis connection
+                    const redis = require('./utils/redis');
+                    if (redis.enabled) {
+                        await redis.disconnect();
+                    }
+                    
+                    console.log('Cleanup completed');
+                    process.exit(0);
+                } catch (error) {
+                    console.error('Error during cleanup:', error.message);
+                    process.exit(1);
+                }
+            });
+            
+            // Force shutdown after 10 seconds
+            setTimeout(() => {
+                console.error('Could not close connections in time, forcefully shutting down');
+                process.exit(1);
+            }, 10000);
+        };
+
+        // Handle shutdown signals
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+        // Handle uncaught exceptions
+        process.on('uncaughtException', (error) => {
+            console.error('Uncaught Exception:', error);
+            gracefulShutdown('uncaughtException');
+        });
+
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+            gracefulShutdown('unhandledRejection');
+        });
+
         // ============ SERVER STARTUP ============
-        app.listen(PORT, 'localhost', () => {
+        const server = app.listen(PORT, 'localhost', () => {
             console.log('\n🚀 ==========================================');
-            console.log(`⚡ OPTIMIZED HEROX123 APP STARTED!`);
+            console.log(`⚡ ENHANCED HEROX123 APP STARTED!`);
             console.log(`📱 Frontend: http://localhost:${PORT}`);
             console.log(`🔧 Backend API: http://localhost:${PORT}/api`);
+            console.log(`🎌 Animepahe API: http://localhost:${PORT}/api/animepahe`);
             console.log(`🏠 Scraping: Using user's residential IP`);
-            console.log(`🎯 Status: Ready for TWA packaging!`);
+            console.log(`🎯 Status: Ready with full anime features!`);
             console.log('🚀 ==========================================\n');
-            console.log('📍 Performance Optimizations:');
-            console.log('   ⚡ Zero-middleware Next.js API routes');
-            console.log('   🚀 Selective CORS application');  
-            console.log('   💾 Static asset caching');
-            console.log('   🔥 Reduced logging overhead');
+            console.log('📍 Available Animepahe Features:');
+            console.log('   🔍 Search anime by title');
+            console.log('   📺 Get currently airing anime');
+            console.log('   📖 Get detailed anime information');
+            console.log('   📋 Get anime episode lists');
+            console.log('   🔎 Browse anime catalog');
+            console.log('   🎥 Get streaming links');
+            console.log('   📊 Check encoding queue status');
+            console.log('   💾 Redis caching for performance');
             
             if (dev) {
                 console.log('\n💡 Development mode - auto-reload enabled');
-                console.log(`🌐 Open: http://localhost:${PORT}`);
+                console.log(`🌐 Test endpoints: http://localhost:${PORT}/api/health`);
+            }
+        });
+
+        // Handle server errors
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`Port ${PORT} is already in use`);
+                process.exit(1);
+            } else {
+                console.error('Server error:', error);
             }
         });
 
@@ -147,17 +256,6 @@ async function startUnifiedServer() {
         process.exit(1);
     }
 }
-
-// Handle process termination
-process.on('SIGINT', () => {
-    console.log('\n👋 Shutting down unified server...');
-    process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-    console.log('\n👋 Shutting down unified server...');
-    process.exit(0);
-});
 
 // Start the server
 if (require.main === module) {

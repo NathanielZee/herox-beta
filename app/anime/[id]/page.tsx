@@ -5,23 +5,13 @@ import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft, Play, Download, Star, Clock, Calendar, X, Crown, RotateCw } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { fetchMediaDetails } from "@/lib/anilist"
+// FIXED: Updated import to match the exact exports from lib/anilist.ts
+import { fetchMediaDetails, fetchAnimeEpisodes } from "@/lib/anilist"
+import type { AnimeData, AniListEpisode } from "@/lib/anilist"
 import { downloadEpisodeAsMp4 } from "@/lib/download-episode"
 import { usePremium } from "@/contexts/PremiumContext"
 import { PremiumModal } from "@/components/PremiumModal"
-import { StreamAPI } from "@/lib/stream-api" // Import StreamAPI
-import type { AnimeData } from "@/lib/anilist"
-
-interface Episode {
-  id: string
-  episode: number
-  title?: string
-  snapshot?: string
-  session?: string
-  anime_id?: string
-  filler?: number
-  createdAt?: string
-}
+import { StreamAPI } from "@/lib/stream-api"
 
 interface AnimepaheSearchResult {
   id: number
@@ -43,7 +33,6 @@ interface DownloadState {
   intervalId?: NodeJS.Timeout
 }
 
-// StreamData interface to match StreamAPI response
 interface StreamData {
   ids?: {
     animepahe_id?: number
@@ -128,14 +117,13 @@ export default function AnimeDetailPage() {
   const [premiumModalMessage, setPremiumModalMessage] = useState<string>()
   const [downloadsLeft, setDownloadsLeft] = useState<number>()
 
-  // Episode states with pagination
-  const [episodes, setEpisodes] = useState<Episode[]>([])
-  const [hasEpisodes, setHasEpisodes] = useState(false)
-  const [episodeLoading, setEpisodeLoading] = useState(false)
+  // NEW: AniList Episode states (instant loading)
+  const [episodes, setEpisodes] = useState<AniListEpisode[]>([])
+  const [loadingEpisodes, setLoadingEpisodes] = useState(false)
+
+  // AnimePahe states (only used when clicking episodes/downloads)
   const [animepaheData, setAnimepaheData] = useState<AnimepaheSearchResult | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [hasMoreEpisodes, setHasMoreEpisodes] = useState(false)
-  const [loadingMoreEpisodes, setLoadingMoreEpisodes] = useState(false)
+  const [initializingAnimepahe, setInitializingAnimepahe] = useState(false)
   
   // Download states
   const [downloadingEpisodes, setDownloadingEpisodes] = useState<Map<string, DownloadState>>(new Map())
@@ -143,7 +131,7 @@ export default function AnimeDetailPage() {
 
   // Quality popup states
   const [showQualityPopup, setShowQualityPopup] = useState(false)
-  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null)
+  const [selectedEpisode, setSelectedEpisode] = useState<AniListEpisode | null>(null)
   const [selectedQuality, setSelectedQuality] = useState<string>('720p')
   const [selectedVersion, setSelectedVersion] = useState<'sub' | 'dub'>('sub')
   const [availableQualities, setAvailableQualities] = useState<string[]>(['720p'])
@@ -156,20 +144,41 @@ export default function AnimeDetailPage() {
   const [bulkAvailableQualities, setBulkAvailableQualities] = useState<string[]>(['720p'])
   const [bulkAvailableVersions, setBulkAvailableVersions] = useState<string[]>(['sub'])
 
+  // Load anime details and episodes from AniList on page load
   useEffect(() => {
     const loadAnimeDetails = async () => {
       try {
+        console.log(`🔍 Loading anime details for ID: ${id}`)
         const data = await fetchMediaDetails(id)
 
-        if (data?.type !== "ANIME") {
+        if (!data) {
+          console.log("❌ No anime data found")
           setAnime(null)
           setLoading(false)
           return
         }
 
+        if (data?.type !== "ANIME") {
+          console.log("❌ Not an anime type:", data.type)
+          setAnime(null)
+          setLoading(false)
+          return
+        }
+
+        console.log("✅ Anime details loaded:", data.title)
         setAnime(data)
+        
+        // Load episodes from AniList immediately
+        console.log("🎬 Loading episodes from AniList...")
+        setLoadingEpisodes(true)
+        const aniListEpisodes = await fetchAnimeEpisodes(id)
+        setEpisodes(aniListEpisodes)
+        setLoadingEpisodes(false)
+        
+        console.log(`✅ Loaded ${aniListEpisodes.length} episodes from AniList instantly`)
+
       } catch (error) {
-        console.error("Error loading anime details:", error)
+        console.error("❌ Error loading anime details:", error)
       } finally {
         setLoading(false)
       }
@@ -179,12 +188,6 @@ export default function AnimeDetailPage() {
       loadAnimeDetails()
     }
   }, [id])
-
-  useEffect(() => {
-    if (anime) {
-      fetchEpisodes(anime, 1, true) // Initial load
-    }
-  }, [anime])
 
   // Cleanup countdown intervals on unmount
   useEffect(() => {
@@ -197,136 +200,64 @@ export default function AnimeDetailPage() {
     }
   }, [])
 
-  const fetchEpisodes = async (animeData: AnimeData, page: number = 1, isInitialLoad: boolean = false) => {
-    if (isInitialLoad) {
-      setEpisodeLoading(true)
-      setEpisodes([])
-      setHasEpisodes(false)
-      setAnimepaheData(null)
-      setCurrentPage(1)
-      setHasMoreEpisodes(false)
-    } else {
-      setLoadingMoreEpisodes(true)
+  // NEW: Initialize AnimePahe data only when needed (called when user clicks episode/download)
+  const initializeAnimepaheData = async (): Promise<AnimepaheSearchResult | null> => {
+    if (animepaheData) {
+      return animepaheData // Already initialized
     }
-  
-    try {
-      // If this is not the initial load and we don't have animepahe data, we need to search first
-      let animeResult = animepaheData
-      
-      if (!animeResult) {
-        console.log(`Searching for: ${animeData.title.english || animeData.title.romaji} on Animepahe`)
-        
-        const searchUrl = `/api/animepahe/search?q=${encodeURIComponent(
-          animeData.title.english || animeData.title.romaji
-        )}`
-        console.log("Search URL:", searchUrl)
-        
-        const searchRes = await fetch(searchUrl)
-        if (!searchRes.ok) {
-          throw new Error(`Search failed with status: ${searchRes.status}`)
-        }
-        
-        const searchData = await searchRes.json()
-        console.log("Search results:", searchData)
-        
-        if (!Array.isArray(searchData.data) || searchData.data.length === 0) {
-          console.log("No search results found")
-          setHasEpisodes(false)
-          return
-        }
-        
-        // Use exact matching function instead of just picking first result
-        animeResult = findExactAnimeMatch(searchData.data, animeData)
-        setAnimepaheData(animeResult)
-        console.log("Selected anime result:", animeResult)
-      }
-  
-      const episodesUrl = `/api/animepahe/episodes?session=${animeResult.session}&page=${page}`
-      console.log("Episodes URL:", episodesUrl)
-  
-      const episodesRes = await fetch(episodesUrl)
-      if (!episodesRes.ok) {
-        const errorText = await episodesRes.text()
-        console.log(`Episodes fetch failed with status: ${episodesRes.status}`)
-        console.log("Error response:", errorText)
-        if (isInitialLoad) {
-          setHasEpisodes(false)
-        }
-        return
-      }
-  
-      const episodesData = await episodesRes.json()
-      console.log("Episodes data for page", page, ":", episodesData)
-  
-      let processedEpisodes: Episode[] = []
-      if (Array.isArray(episodesData.data)) {
-        processedEpisodes = episodesData.data.map((ep: any) => ({
-          id: ep.session,
-          episode: ep.episode,
-          title: ep.title,
-          snapshot: ep.snapshot,
-          session: ep.session,
-          anime_id: ep.anime_id,
-          filler: ep.filler,
-          createdAt: ep.created_at
-        }))
-      }
-  
-      console.log("Processed episodes for page", page, ":", processedEpisodes)
-  
-      if (processedEpisodes.length === 0) {
-        console.log("No episodes found for page", page)
-        if (isInitialLoad) {
-          setHasEpisodes(false)
-        }
-        setHasMoreEpisodes(false)
-        return
-      }
-  
-      if (isInitialLoad) {
-        setEpisodes(processedEpisodes)
-        setHasEpisodes(true)
-      } else {
-        // Append new episodes to existing ones
-        setEpisodes(prev => [...prev, ...processedEpisodes])
-      }
-      
-      // Check if there are more episodes (if we got exactly 30, there might be more)
-      setHasMoreEpisodes(processedEpisodes.length === 30)
-      setCurrentPage(page)
-      
-    } catch (error) {
-      console.error("Error fetching episodes:", error)
-      if (isInitialLoad) {
-        setHasEpisodes(false)
-      }
-    } finally {
-      if (isInitialLoad) {
-        setEpisodeLoading(false)
-      } else {
-        setLoadingMoreEpisodes(false)
-      }
-    }
-  }
 
-  // Load more episodes
-  const loadMoreEpisodes = async () => {
-    if (!anime || loadingMoreEpisodes || !hasMoreEpisodes) return
-    
-    const nextPage = currentPage + 1
-    await fetchEpisodes(anime, nextPage, false)
+    if (!anime) return null
+
+    setInitializingAnimepahe(true)
+    try {
+      console.log(`🔍 Initializing AnimePahe data for: ${anime.title.english || anime.title.romaji}`)
+      const query = anime.title.english || anime.title.romaji
+      const searchData = await StreamAPI.searchAnime(query, 1)
+      console.log("AnimePahe search results:", searchData)
+
+      if (!Array.isArray(searchData.data) || searchData.data.length === 0) {
+        console.log("❌ No AnimePahe search results found")
+        return null
+      }
+
+      // Use exact matching function
+      const animeResult = findExactAnimeMatch(searchData.data, anime)
+      setAnimepaheData(animeResult)
+      console.log("✅ AnimePahe data initialized:", animeResult)
+      
+      return animeResult
+    } catch (error) {
+      console.error("❌ Failed to initialize AnimePahe data:", error)
+      return null
+    } finally {
+      setInitializingAnimepahe(false)
+    }
   }
 
   // Get available qualities and versions for an episode using StreamAPI
-  const getEpisodeQualities = async (episode: Episode): Promise<{qualities: string[], versions: string[], sources: any[]}> => {
-    if (!animepaheData) return {qualities: [], versions: [], sources: []}
+  const getEpisodeQualities = async (episode: AniListEpisode): Promise<{qualities: string[], versions: string[], sources: any[]}> => {
+    const animepaheResult = await initializeAnimepaheData()
+    if (!animepaheResult) return {qualities: [], versions: [], sources: []}
 
     try {
       console.log(`🎯 Getting qualities for episode ${episode.episode} using StreamAPI`)
-      console.log(`Anime session: ${animepaheData.session}, Episode session: ${episode.session}`)
       
+      // First, get the AnimePahe episodes to find the matching session
+      const episodesData = await StreamAPI.getAnimeEpisodes(animepaheResult.session, 'episode_asc', 1)
+      if (!Array.isArray(episodesData.data)) {
+        console.log("❌ No AnimePahe episodes found")
+        return {qualities: [], versions: [], sources: []}
+      }
+
+      // Find the matching episode by episode number
+      const matchingEpisode = episodesData.data.find((ep: any) => ep.episode === episode.episode)
+      if (!matchingEpisode) {
+        console.log(`❌ Episode ${episode.episode} not found in AnimePahe`)
+        return {qualities: [], versions: [], sources: []}
+      }
+
       // Use StreamAPI to get stream data
-      const streamData = await StreamAPI.getStreamingLinks(animepaheData.session, episode.session)
+      const streamData = await StreamAPI.getStreamingLinks(animepaheResult.session, matchingEpisode.session)
       console.log('Stream data for episode', episode.episode, ':', streamData)
       
       if (streamData.sources && Array.isArray(streamData.sources)) {
@@ -354,15 +285,24 @@ export default function AnimeDetailPage() {
   }
 
   // Get stream URL for an episode with specific quality and version using StreamAPI
-  const getEpisodeStreamUrl = async (episode: Episode, quality: string = '720p', version: 'sub' | 'dub' = 'sub'): Promise<string | null> => {
-    if (!animepaheData) return null
+  const getEpisodeStreamUrl = async (episode: AniListEpisode, quality: string = '720p', version: 'sub' | 'dub' = 'sub'): Promise<string | null> => {
+    const animepaheResult = await initializeAnimepaheData()
+    if (!animepaheResult) return null
 
     try {
       console.log(`🎯 Getting stream URL for episode ${episode.episode}`)
       console.log(`Quality: ${quality}, Version: ${version}`)
       
+      // First, get the AnimePahe episodes to find the matching session
+      const episodesData = await StreamAPI.getAnimeEpisodes(animepaheResult.session, 'episode_asc', 1)
+      if (!Array.isArray(episodesData.data)) return null
+
+      // Find the matching episode by episode number
+      const matchingEpisode = episodesData.data.find((ep: any) => ep.episode === episode.episode)
+      if (!matchingEpisode) return null
+      
       // Use StreamAPI to get stream data
-      const streamData = await StreamAPI.getStreamingLinks(animepaheData.session, episode.session)
+      const streamData = await StreamAPI.getStreamingLinks(animepaheResult.session, matchingEpisode.session)
       console.log(`Looking for quality: ${quality}, version: ${version}`)
       console.log('Available sources:', streamData.sources)
       
@@ -453,7 +393,7 @@ export default function AnimeDetailPage() {
   }
 
   // Handle episode download button click (with premium check)
-  const handleEpisodeDownloadClick = async (episode: Episode) => {
+  const handleEpisodeDownloadClick = async (episode: AniListEpisode) => {
     const downloadState = downloadingEpisodes.get(episode.id)
     if (downloadState?.isDownloading) return
     
@@ -467,8 +407,18 @@ export default function AnimeDetailPage() {
       return
     }
 
+    // Show loading state while initializing AnimePahe
+    if (initializingAnimepahe) {
+      return
+    }
+
     // Get available qualities and versions for this episode
     const {qualities, versions} = await getEpisodeQualities(episode)
+    
+    if (qualities.length === 0) {
+      alert("Could not get episode data from AnimePahe. Please try again.")
+      return
+    }
     
     // Show all qualities but mark HD as premium
     setAvailableQualities(qualities.map(q => `${q}p`))
@@ -491,7 +441,7 @@ export default function AnimeDetailPage() {
 
   // Handle bulk download button click (with premium check)
   const handleBulkDownloadClick = async () => {
-    if (!episodes.length || !animepaheData || bulkDownloading) return
+    if (!episodes.length || bulkDownloading) return
 
     // Check if user can bulk download
     const bulkCheck = checkCanBulkDownload()
@@ -502,9 +452,26 @@ export default function AnimeDetailPage() {
       return
     }
 
+    // Show loading state while initializing AnimePahe
+    if (initializingAnimepahe) {
+      return
+    }
+
+    // Initialize AnimePahe data first
+    const animepaheResult = await initializeAnimepaheData()
+    if (!animepaheResult) {
+      alert("Could not connect to AnimePahe. Please try again.")
+      return
+    }
+
     // Premium users can proceed
     if (episodes.length > 0) {
       const {qualities, versions} = await getEpisodeQualities(episodes[0])
+      
+      if (qualities.length === 0) {
+        alert("Could not get episode data from AnimePahe. Please try again.")
+        return
+      }
       
       setBulkAvailableQualities(qualities.map(q => `${q}p`))
       setBulkAvailableVersions(versions)
@@ -522,7 +489,7 @@ export default function AnimeDetailPage() {
 
   // Handle actual bulk download after quality selection
   const handleConfirmBulkDownload = async () => {
-    if (!episodes.length || !animepaheData) return
+    if (!episodes.length) return
 
     setShowBulkPopup(false)
     setBulkDownloading(true)
@@ -610,7 +577,7 @@ export default function AnimeDetailPage() {
   }
 
   const handleConfirmDownload = async () => {
-    if (!selectedEpisode || !animepaheData) return
+    if (!selectedEpisode) return
 
     setShowQualityPopup(false)
     
@@ -979,11 +946,11 @@ export default function AnimeDetailPage() {
                 {/* Stream Button */}
                 <button
                   onClick={() => {
-                    if (hasEpisodes && episodes.length > 0 && episodes[0]?.episode) {
+                    if (episodes.length > 0) {
                       router.push(`/watch/${id}/${episodes[0].episode}`)
                     }
                   }}
-                  disabled={!hasEpisodes || episodes.length === 0}
+                  disabled={episodes.length === 0}
                   className="bg-[#ff914d] hover:bg-[#e8823d] text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="w-3 h-3" />
@@ -993,14 +960,14 @@ export default function AnimeDetailPage() {
                 {/* Bulk Download Button with Premium Icon */}
                 <button
                   onClick={handleBulkDownloadClick}
-                  disabled={!hasEpisodes || episodes.length === 0 || bulkDownloading}
+                  disabled={episodes.length === 0 || bulkDownloading || initializingAnimepahe}
                   className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
                   {!isPremium && (
                     <Crown className="w-3 h-3 text-[#ff914d] absolute -top-1 -right-1" />
                   )}
                   <Download className="w-3 h-3" />
-                  {bulkDownloading ? "Downloading..." : "Download"}
+                  {initializingAnimepahe ? "Loading..." : bulkDownloading ? "Downloading..." : "Download"}
                 </button>
               </div>
             </div>
@@ -1055,8 +1022,8 @@ export default function AnimeDetailPage() {
           </div>
         </div>
 
-        {/* Episodes Section with Pagination */}
-        {hasEpisodes && (
+        {/* Episodes Section - Now using AniList data */}
+        {episodes.length > 0 && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white">Episodes</h3>
@@ -1072,8 +1039,7 @@ export default function AnimeDetailPage() {
                 </div>
               )}
             </div>
-            
-            {episodeLoading ? (
+            {loadingEpisodes ? (
               <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex gap-3 pb-2 w-max">
                   {Array(6)
@@ -1090,11 +1056,12 @@ export default function AnimeDetailPage() {
               <div>
                 <div className="overflow-x-auto scrollbar-hide">
                   <div className="flex gap-3 pb-2 w-max">
-                    {episodes.map((episode) => {
+                    {/* Episodes from AniList - sorted ascending, fallback to anime cover if no episode thumbnail, only show 'Episode {number}' */}
+                    {episodes.slice().sort((a, b) => a.episode - b.episode).map((episode) => {
                       const downloadState = downloadingEpisodes.get(episode.id)
                       const isDownloading = downloadState?.isDownloading || false
                       const countdown = downloadState?.countdown || 0
-                      
+                      const episodeImage = episode.snapshot ? `/api/proxy-image?url=${encodeURIComponent(episode.snapshot)}` : (anime?.coverImage?.large || "/placeholder.svg")
                       return (
                         <div key={episode.id} className="flex-shrink-0 w-24">
                           <div 
@@ -1102,25 +1069,25 @@ export default function AnimeDetailPage() {
                             onClick={() => handleEpisodeDownloadClick(episode)}
                           >
                             <Image
-                              src={`/api/proxy-image?url=${encodeURIComponent(episode.snapshot || "")}`}
+                              src={episodeImage}
                               alt={`Episode ${episode.episode}`}
                               fill
                               unoptimized
                               className="object-cover"
                             />
                             {/* Download overlay - hide when downloading */}
-                            {!isDownloading && (
+                            {!isDownloading && !initializingAnimepahe && (
                               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                 <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
                                   <Download className="w-4 h-4 text-white" />
                                 </div>
                               </div>
                             )}
-                            {isDownloading && (
+                            {(isDownloading || initializingAnimepahe) && (
                               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <div className="text-center">
                                   <div className="text-white text-xs font-medium">
-                                    Processing...
+                                    {initializingAnimepahe ? "Loading..." : "Processing..."}
                                   </div>
                                 </div>
                               </div>
@@ -1141,33 +1108,23 @@ export default function AnimeDetailPage() {
                         </div>
                       )
                     })}
-                    
-                    {/* Load More Button */}
-                    {hasMoreEpisodes && (
-                      <div className="flex-shrink-0 w-24 flex items-center justify-center">
-                        <button
-                          onClick={loadMoreEpisodes}
-                          disabled={loadingMoreEpisodes}
-                          className="w-16 h-16 rounded-full bg-gray-800 hover:bg-gray-700 border-2 border-gray-600 hover:border-[#ff914d] flex items-center justify-center transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {loadingMoreEpisodes ? (
-                            <RotateCw className="w-6 h-6 text-gray-400 animate-spin" />
-                          ) : (
-                            <RotateCw className="w-6 h-6 text-gray-400 group-hover:text-[#ff914d] transition-colors" />
-                          )}
-                        </button>
-                        {loadingMoreEpisodes && (
-                          <p className="text-[#ff914d] text-xs text-center mt-2 absolute top-20">
-                            Loading...
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
-
               </div>
             )}
+          </div>
+        )}
+
+        {/* No episodes fallback */}
+        {!loadingEpisodes && episodes.length === 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">Episodes</h3>
+            </div>
+            <div className="text-center py-8">
+              <p className="text-gray-400 text-sm">No episodes found</p>
+              <p className="text-gray-500 text-xs mt-1">This anime might not have episode data available</p>
+            </div>
           </div>
         )}
 
